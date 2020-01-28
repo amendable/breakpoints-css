@@ -1,0 +1,36 @@
+{
+  "name": "@amendable/breakpoints-css",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/amendable/breakpoints-css",
+  "bugs": {
+    "url": "https://github.com/amendable/breakpoints-css/issues"
+  },
+  "repository": "amendable/breakpoints-css",
+  "devDependencies": {
+    "@amendable/prettier-config": "^1.0.0",
+    "@babel/preset-env": "^7.8.3",
+    "@babel/preset-react": "^7.8.3",
+    "babel-plugin-lodash": "^3.3.4",
+    "jest": "^25.1.0",
+    "microbundle": "^0.11.0",
+    "prettier": "^1.19.1",
+    "rimraf": "^3.0.0"
+  },
+  "scripts": {
+    "build": "rimraf dist && microbundle build --no-compress --name amendableBreakpointsCss",
+    "watch": "microbundle watch --no-compress",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@amendable/hash": "^0.1.0",
+    "@babel/runtime": "^7.8.3",
+    "lodash": "^4.17.15"
+  },
+  "prettier": "@amendable/prettier-config"
+}
