@@ -20,9 +20,21 @@ export default ({ breakpoints = defaultBreakpoints } = { breakpoints: defaultBre
       return memo
     }, {})
 
+    let index = -1
+
     const result = _.reduce(sortedValues, (memo, innerValue, innerKey) => {
+      index++
+
       if (_.isUndefined(breakpoints[innerKey])) {
         console.warn(`Responsive resolver: ${innerKey} breakpoint missing from config`)
+      }
+
+      if (index === 0) {
+        console.log({a: applyResolvers({ [key]: innerValue }).css })
+        return {
+          ...memo,
+          ...applyResolvers({ [key]: innerValue }).css
+        }
       }
 
       const breakpointKey = `@media (min-width: ${breakpoints[innerKey]})`
