@@ -1,57 +1,58 @@
 import _ from 'lodash'
 import defaultBreakpoints from './defaultBreakpoints'
+import getDefaultBreakpointKey from './getDefaultBreakpointKey'
 
-export default ({ breakpoints = defaultBreakpoints } = { breakpoints: defaultBreakpoints }) => ({
-  match: ({ value }) => {
-    if (!_.isPlainObject(value)) return
+export default ({ breakpoints = defaultBreakpoints } = { breakpoints: defaultBreakpoints }) => {
+  const defaultBreakpointKey = getDefaultBreakpointKey({ breakpoints })
 
-    return !_.isEmpty(_.intersection(_.keys(value), _.keys(breakpoints)))
-  },
-  resolve: ({
-    key,
-    value,
-    applyResolvers,
-    props,
-  }) => {
-    const sortedValues = _.reduce(breakpoints, (memo, val, key) => {
-      if (_.isUndefined(value[key])) return memo
+  return ({
+    match: ({ value }) => {
+      if (!_.isPlainObject(value)) return
 
-      memo[key] = value[key]
-      return memo
-    }, {})
+      return !_.isEmpty(_.intersection(_.keys(value), _.keys(breakpoints)))
+    },
+    resolve: ({
+      key,
+      value,
+      applyResolvers,
+      props,
+    }) => {
+      const sortedValues = _.reduce(breakpoints, (memo, val, key) => {
+        if (_.isUndefined(value[key])) return memo
 
-    let index = -1
+        memo[key] = value[key]
+        return memo
+      }, {})
 
-    const result = _.reduce(sortedValues, (memo, innerValue, innerKey) => {
-      index++
+      const result = _.reduce(sortedValues, (memo, innerValue, innerKey) => {
+        if (_.isUndefined(breakpoints[innerKey])) {
+          console.warn(`Responsive resolver: ${innerKey} breakpoint missing from config`)
+        }
 
-      if (_.isUndefined(breakpoints[innerKey])) {
-        console.warn(`Responsive resolver: ${innerKey} breakpoint missing from config`)
-      }
+        if (innerKey === defaultBreakpointKey) {
+          return {
+            ...memo,
+            ...applyResolvers({ [key]: innerValue }).css
+          }
+        }
 
-      if (index === 0) {
+        const breakpointKey = `@media (min-width: ${breakpoints[innerKey]})`
+
         return {
           ...memo,
-          ...applyResolvers({ [key]: innerValue }).css
+          [breakpointKey]: {
+            ...(props.css || {})[breakpointKey],
+            ...applyResolvers({ [key]: innerValue }).css
+          }
         }
-      }
-
-      const breakpointKey = `@media (min-width: ${breakpoints[innerKey]})`
+      }, {})
 
       return {
-        ...memo,
-        [breakpointKey]: {
-          ...(props.css || {})[breakpointKey],
-          ...applyResolvers({ [key]: innerValue }).css
-        }
+        css: {
+          ...(props.css || {}),
+          ...result,
+        },
       }
-    }, {})
-
-    return {
-      css: {
-        ...(props.css || {}),
-        ...result,
-      },
     }
-  }
-})
+  })
+}
