@@ -30,7 +30,6 @@ export default ({ breakpoints = defaultBreakpoints } = { breakpoints: defaultBre
       }
 
       if (index === 0) {
-        console.log({a: applyResolvers({ [key]: innerValue }).css })
         return {
           ...memo,
           ...applyResolvers({ [key]: innerValue }).css
