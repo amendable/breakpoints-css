@@ -1,22 +1,12 @@
 import _ from 'lodash'
 import defaultBreakpoints from './defaultBreakpoints'
-import getDefaultBreakpointKey from './getDefaultBreakpointKey'
 
-export default ({ breakpoints = defaultBreakpoints } = { breakpoints: defaultBreakpoints }) => {
-  const defaultBreakpointKey = getDefaultBreakpointKey({ breakpoints })
-
-  return ({
-    match: ({ value }) => {
+export default ({ breakpoints = defaultBreakpoints } = { breakpoints: defaultBreakpoints }) => (
+  (props, { applyResolvers }) => {
+    _.each(props, (value, key) => {
       if (!_.isPlainObject(value)) return
+      if (_.isEmpty(_.intersection(_.keys(value), _.keys(breakpoints)))) return
 
-      return !_.isEmpty(_.intersection(_.keys(value), _.keys(breakpoints)))
-    },
-    resolve: ({
-      key,
-      value,
-      applyResolvers,
-      props,
-    }) => {
       const sortedValues = _.reduce(breakpoints, (memo, val, key) => {
         if (_.isUndefined(value[key])) return memo
 
@@ -24,35 +14,24 @@ export default ({ breakpoints = defaultBreakpoints } = { breakpoints: defaultBre
         return memo
       }, {})
 
-      const result = _.reduce(sortedValues, (memo, innerValue, innerKey) => {
+      _.each(sortedValues, (innerValue, innerKey) => {
         if (_.isUndefined(breakpoints[innerKey])) {
           console.warn(`Responsive resolver: ${innerKey} breakpoint missing from config`)
         }
 
-        if (innerKey === defaultBreakpointKey) {
-          return {
-            ...memo,
-            ...applyResolvers({ [key]: innerValue }).css
-          }
-        }
-
         const breakpointKey = `@media (min-width: ${breakpoints[innerKey]})`
 
-        return {
-          ...memo,
+        delete props[key]
+        props.css = {
+          ...(props.css || {}),
           [breakpointKey]: {
             ...(props.css || {})[breakpointKey],
             ...applyResolvers({ [key]: innerValue }).css
           }
         }
       }, {})
+    })
 
-      return {
-        css: {
-          ...(props.css || {}),
-          ...result,
-        },
-      }
-    }
-  })
-}
+    return props
+  }
+)
