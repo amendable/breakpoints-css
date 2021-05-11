@@ -30,7 +30,7 @@
   "dependencies": {
     "@amendable/hash": "^0.1.0",
     "@babel/runtime": "^7.8.3",
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.21"
   },
   "prettier": "@amendable/prettier-config"
 }
